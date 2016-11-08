@@ -200,77 +200,102 @@ func wordClock() {
 
 // get the time doh!
 func getTime(t *timeStruct) {
-	now := time.Now()
-	t.hour, t.minute, _ = now.Clock()
+	t.hour, t.minute, _ = time.Now().Clock()
 }
 
 // translate time in numbers to string
 func showTime(w *wordStruct, t *timeStruct) {
 	plusHour := t.hour
+	hourAdded := false
+	// add it is
+	addWordToString(w.words[0], w, true)
 
-	// out>>it is
-	addWordToString(w.words[0], w)
-
-	// out>>minutes
 	if t.minute == 0 {
+		hourAdded = true
+		// check full hour
 		if t.hour == 0 {
-			addWordToString(w.words[8], w)
+			// add midnight
+			addWordToString(w.words[8], w, true)
 		} else if t.hour == 12 {
-			addWordToString(w.words[7], w)
+			// add noon
+			addWordToString(w.words[7], w, true)
 		} else {
-			addWordToString(w.words[4], w)
+			// add hour
+			addHours(w, t, plusHour)
+			// add o'clock
+			addWordToString(w.words[4], w, true)
+			addTimeOfDay(w, t)
 		}
 	} else {
-		if t.minute <= 20 { // one .. twenty
-			addWordToString(w.minutes[t.minute-1], w)
-		} else if t.minute < 30 { // twenty one .. twenty nine
-			addWordToString(w.minutes[19], w)
-			addWordToString(w.minutes[t.minute-21], w)
-		} else if t.minute == 30 { // half
-			addWordToString(w.words[1], w)
-		} else if t.minute < 40 { // twenty nine .. twenty one
-			addWordToString(w.minutes[19], w) // twenty
-			addWordToString(w.minutes[60-t.minute-21], w)
-		} else { // twenty .. one
-			addWordToString(w.minutes[60-t.minute-1], w)
-		}
-		if t.minute <= 30 { // past
-			addWordToString(w.words[3], w)
-		} else { // to
-			addWordToString(w.words[2], w)
-			plusHour++
-		}
+		// add minutes
+		plusHour = addMinutes(w, t, plusHour)
 	}
+	// add hours
+	if !hourAdded {
+		addHours(w, t, plusHour)
+		addTimeOfDay(w, t)
+	}
+}
 
-	// out>>hours
+// add time of day to string
+func addTimeOfDay(w *wordStruct, t *timeStruct) {
+	if t.hour < 6 { // add at night
+		addWordToString(w.words[10], w, true)
+	} else if t.hour < 12 { // add in the morning
+		addWordToString(w.words[5], w, true)
+		addWordToString(w.words[9], w, true)
+	} else if t.hour < 18 { // add in the afternoon
+		addWordToString(w.words[5], w, true)
+		addWordToString(w.words[6], w, true)
+	} else { // add at night (again, hmmm)
+		addWordToString(w.words[10], w, true)
+	}
+}
+
+// add hours to string
+func addHours(w *wordStruct, t *timeStruct, plusHour int) {
 	if !(t.minute == 0 && (t.hour == 0 || t.hour == 12)) {
-		// Hours
 		if plusHour == 0 {
-			addWordToString(w.hours[11], w)
+			addWordToString(w.hours[11], w, true)
 		} else if plusHour <= 12 {
-			addWordToString(w.hours[plusHour-1], w)
+			addWordToString(w.hours[plusHour-1], w, true)
 		} else {
-			addWordToString(w.hours[plusHour-13], w)
-		}
-		if plusHour == 11 || plusHour == 23 {
-			//addWordToString(w_el)
-		}
-		// Time of day
-		if t.hour < 6 { // at night
-			addWordToString(w.words[10], w)
-		} else if t.hour < 12 { // in the morning
-			addWordToString(w.words[5], w)
-			addWordToString(w.words[9], w)
-		} else if t.hour < 18 { // in the afternoon
-			addWordToString(w.words[5], w)
-			addWordToString(w.words[6], w)
-		} else { // at night (again)
-			addWordToString(w.words[10], w)
+			addWordToString(w.hours[plusHour-13], w, true)
 		}
 	}
 }
 
+// add minutes to string
+func addMinutes(w *wordStruct, t *timeStruct, plusHour int) int {
+	if t.minute <= 20 { // one .. twenty
+		addWordToString(w.minutes[t.minute-1], w, true)
+	} else if t.minute < 30 { // twenty one .. twenty nine
+		addWordToString(w.minutes[19], w, false)
+		addWordToString(w.minutes[t.minute-21], w, true)
+	} else if t.minute == 30 { // half
+		addWordToString(w.words[1], w, true)
+	} else if t.minute < 40 { // twenty nine .. twenty one
+		addWordToString(w.minutes[19], w, false) // twenty
+		addWordToString(w.minutes[60-t.minute-21], w, true)
+	} else { // twenty .. one
+		addWordToString(w.minutes[60-t.minute-1], w, true)
+	}
+	if t.minute <= 30 { // add past
+		addWordToString(w.words[3], w, true)
+	} else { // add to
+		addWordToString(w.words[2], w, true)
+		plusHour++
+	}
+	return plusHour
+}
+
 // append new word to output string
-func addWordToString(addWord string, w *wordStruct) {
-	w.output += addWord + " "
+func addWordToString(addWord string, w *wordStruct, space bool) {
+	var spString string
+	if space {
+		spString = " "
+	} else {
+		spString = "-"
+	}
+	w.output += addWord + spString
 }
