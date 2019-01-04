@@ -1,5 +1,6 @@
 // Various small katas to test out Go
 //
+// v1.3: Added Adder
 // v1.2: Added Word CLock
 // v1.1: Added CLI menu and gcd
 // v1.0: Added FizzBuzz
@@ -43,6 +44,8 @@ func main() {
 			fizzBuzz()
 		case "gcd":
 			gcd()
+		case "add":
+			add()
 		case "clock":
 			wordClock()
 		case "help":
@@ -58,9 +61,24 @@ func help() {
 	fmt.Println("Available Commands:")
 	fmt.Println(" - fizzbuzz   | the drinking game")
 	fmt.Println(" - gcd        | find greatest common denominator")
+	fmt.Println(" - add        | add 1..100 that are multiples of 7 and 3")
 	fmt.Println(" - clock      | word clock")
 	fmt.Println(" - help       | list of commands")
 	fmt.Println(" - quit       | exit this application")
+}
+
+// add prints sum of all multiples of 7 and 3
+func add() {
+
+	sum := 0
+
+	fmt.Println(" # : sum")
+	for i := 1; i < 100; i++ {
+		if i%7 == 0 || i%3 == 0 {
+			sum += i
+		}
+		fmt.Printf("%3d : %4d\n", i, sum)
+	}
 }
 
 // get greatest common denominator between two numbers
